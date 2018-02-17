@@ -4,7 +4,7 @@ var keys = require("./key.js");
 var Twitter = require("twitter");
 var Spotify = require("node-spotify-api");
 var request = require("request");
-var fs = require("fs")
+var fs = require("fs");
 
 var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
@@ -55,13 +55,26 @@ function checkSongArg(songName) {
     }
 }
 
+function buildCreationDate(dat) {
+    return    dat[0] + " " + dat[1] + " " + dat[2] + " " + dat[5] + " " +  dat[3];
+}
+
 //functions that get your tweets
 function getTweets() {
     var params = { screen_name: 'newCoding' };
-    client.get('statuses/user_timeline', params, function (error, tweets, response) {
+    client.get('statuses/user_timeline', params, function (error, tweets) {
         if (!error) {
-            console.log(JSON.stringify(tweets, null, 2));
-            console.log(tweets.length);
+
+            console.log("Your Tweets");
+            console.log("================================");
+            for (var i = 0; i < tweets.length; i++){
+                var d = tweets[i].created_at;
+                var dat = d.split(" ");
+                var created = buildCreationDate(dat);
+                console.log("Created: " + created);
+                console.log("Tweet: "  + tweets[i].text);
+                console.log("------------------------------");
+            }
         }
     });
 }
@@ -74,8 +87,21 @@ function searchSpotify(song) {
             return console.log('Error occurred: ' + err);
         }
 
-        //console.log(JSON.stringify(data, null, 2));
-        console.log(data.tracks.items);
+        console.log("Song Search: " + song);
+        console.log("=================================");
+
+        var songArrLength = data.tracks.items.length;
+
+        for (var i = 0; i < songArrLength; i++ ) {
+            console.log("Song Name: " + data.tracks.items[i].name);
+            console.log("Preview URL: " + data.tracks.items[i].preview_url);
+            for (var j = 0; j < data.tracks.items[i].artists.length; j++){
+                console.log("Artist: " + data.tracks.items[i].artists[j].name);
+            }
+            console.log("Album: " + data.tracks.items[i].album.name);
+            console.log("--------------------------------");
+        }
+
     });
 }
 
@@ -90,7 +116,15 @@ function searchMovie(movie) {
 
             // Parse the body of the site and recover just the imdbRating
             // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
-            console.log(JSON.stringify(body, null, 2));
+            console.log("Movie Title: " +  JSON.parse(body).Title);
+            console.log("Year: " + JSON.parse(body).Year);
+            console.log("IMDB Rating: " + JSON.parse(body).imdbRating);
+            console.log("Rotten Tomatoes Rating: " + JSON.parse(body).Ratings[1].Value);
+            console.log("Country: " + JSON.parse(body).Country);
+            console.log("Language: " + JSON.parse(body).Language);
+            console.log("Plot: " + JSON.parse(body).Plot);
+            console.log("Actors: " + JSON.parse(body).Actors);
+
         }
     });
 }
@@ -114,23 +148,18 @@ function readData() {
 
 switch (type) {
     case "my-tweets":
-        // console.log("Tweet");
         getTweets();
         break;
     case "spotify-this-song":
-        // console.log("Song");
         var songNam = checkSongArg(searchReq);
-        // console.log(songNam);
         searchSpotify(songNam);
         break;
     case "movie-this":
-        // console.log("Movie");
-        // console.log(searchReq);
         var urlMoviesarch = "http://www.omdbapi.com/?t=" + searchReq + "&y=&plot=short&apikey=trilogy"
         searchMovie(urlMoviesarch);
         break;
     case "do-what-it-says":
         readData();
-        console.log("Say What?");
+        break;
     default:
 }
