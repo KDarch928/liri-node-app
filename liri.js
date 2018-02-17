@@ -1,9 +1,10 @@
 require("dotenv").config();
 
 var keys = require("./key.js");
-var Twitter = require('twitter');
-var Spotify = require('node-spotify-api');
-var request = require('request');
+var Twitter = require("twitter");
+var Spotify = require("node-spotify-api");
+var request = require("request");
+var fs = require("fs")
 
 var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
@@ -73,7 +74,8 @@ function searchSpotify(song) {
             return console.log('Error occurred: ' + err);
         }
 
-        console.log(JSON.stringify(data, null, 2));
+        //console.log(JSON.stringify(data, null, 2));
+        console.log(data.tracks.items);
     });
 }
 
@@ -90,6 +92,22 @@ function searchMovie(movie) {
             // (Note: The syntax below for parsing isn't obvious. Just spend a few moments dissecting it).
             console.log(JSON.stringify(body, null, 2));
         }
+    });
+}
+
+function readData() {
+    // It's important to include the "utf8" parameter or the code will provide stream data (garbage)
+    // The code will store the contents of the reading inside the variable "data"
+    fs.readFile("random.txt", "utf8", function(error, data) {
+
+        // If the code experiences any errors it will log the error to the console.
+        if (error) {
+            return console.log(error);
+        }
+
+        // We will then re-display the content as an array for later use.
+        searchSpotify(data);
+
     });
 }
 
@@ -112,6 +130,7 @@ switch (type) {
         searchMovie(urlMoviesarch);
         break;
     case "do-what-it-says":
+        readData();
         console.log("Say What?");
     default:
 }
