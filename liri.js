@@ -34,6 +34,8 @@ for (var i = 2; i < usrRequest.length; i++) {
                     searchReq += usrRequest[i];
                 }
                 break;
+            case "my-tweets":
+                searchReq = usrRequest[i];
             default:
         }
     } else {
@@ -44,14 +46,22 @@ for (var i = 2; i < usrRequest.length; i++) {
 
 
 //function to check song argument
-function checkSongArg(songName) {
-    var defaultName = "The Sign"; //default song name
+function checkArg(name, check) {
+    var defaultSong = "The Sign"; //default song name
+    var defaultMovie = "Mr.+Nobody"; //default movie name
+    var defaultTweet = "newCoding";
 
     //if songname is empty set the songNam with a default song
-    if(songName === ""){
-        return defaultName;
+    if(name === ""){
+        if(check === "movie"){
+            return defaultMovie;
+        } else if (check === "tweet") {
+            return defaultTweet;
+        }else {
+            return defaultSong;
+        }
     } else {
-        return songName;
+        return name;
     }
 }
 
@@ -60,9 +70,9 @@ function buildCreationDate(dat) {
 }
 
 //functions that get your tweets
-function getTweets() {
-    var params = { screen_name: 'newCoding' };
-    client.get('statuses/user_timeline', params, function (error, tweets) {
+function getTweets(name) {
+    var params = { screen_name: name };
+    client.get("statuses/user_timeline", params, function (error, tweets) {
         if (!error) {
 
             console.log("Your Tweets");
@@ -148,14 +158,16 @@ function readData() {
 
 switch (type) {
     case "my-tweets":
-        getTweets();
+        var usrName = checkArg(searchReq, "tweet");
+        getTweets(usrName);
         break;
     case "spotify-this-song":
-        var songNam = checkSongArg(searchReq);
+        var songNam = checkArg(searchReq, "song");
         searchSpotify(songNam);
         break;
     case "movie-this":
-        var urlMoviesarch = "http://www.omdbapi.com/?t=" + searchReq + "&y=&plot=short&apikey=trilogy"
+        var movieName = checkArg(searchReq, "movie");
+        var urlMoviesarch = "http://www.omdbapi.com/?t=" + movieName + "&y=&plot=short&apikey=trilogy"
         searchMovie(urlMoviesarch);
         break;
     case "do-what-it-says":
